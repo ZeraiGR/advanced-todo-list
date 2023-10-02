@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  frontend:
+    build: ./front
+    restart: always
+    ports:
+      - '3000:3000'
+    # volumes:
+      # - /app/node_modules
+
+
+# postgres:
+#     image: postgres:latest
+#     environment:
+#       POSTGRES_DB: todo_db
+#       POSTGRES_USER: todo_user
+#       POSTGRES_PASSWORD: todo_password
+#     ports:
+#       - '5432:5432'
