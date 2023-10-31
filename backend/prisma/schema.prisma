@@ -1,0 +1,108 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  firstName       String
+  lastName        String
+  nickName        String    @unique
+  phone           String    @unique
+  email           String    @unique
+  password        String
+  confirmPassword String
+  role            Role      @default(USER)
+  resolvedTodos   Int       @default(0)
+  projects        Project[]
+  comments        Comment[]
+  friends         User[]    @relation("UserFriends")
+  friendOf        User[]    @relation("UserFriends")
+  Like            Like[]
+}
+
+model Project {
+  id          String @id @default(uuid())
+  name        String
+  description String
+  author      User   @relation(fields: [authorId], references: [id])
+  authorId    String
+  todos       Todo[]
+}
+
+model Todo {
+  id          String       @id @default(uuid())
+  number      Int          @unique
+  name        String
+  description String
+  isCompleted Boolean
+  Project     Project      @relation(fields: [projectId], references: [id])
+  projectId   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  dueDate     DateTime?
+  piority     TodoPriority
+  tasks       Task[]
+  comments    Comment[]
+}
+
+model Task {
+  id          String  @id @default(uuid())
+  name        String
+  isCompleted Boolean
+  Todo        Todo    @relation(fields: [todoId], references: [id])
+  todoId      String
+}
+
+model Advice {
+  id   String @id @default(uuid())
+  text String
+}
+
+model Comment {
+  id        String    @id @default(uuid())
+  message   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  Todo      Todo      @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  todoId    String
+  parent    Comment?  @relation("ParentChild", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Comment[] @relation("ParentChild")
+  parentId  String?
+  likes     Like[]
+}
+
+model Like {
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  commentId String
+
+  @@id([userId, commentId])
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum TodoStatus {
+  QUEUE
+  DEVELOPMENT
+  DONE
+}
+
+enum TodoPriority {
+  LOW
+  MEDIUM
+  HIGHT
+}
