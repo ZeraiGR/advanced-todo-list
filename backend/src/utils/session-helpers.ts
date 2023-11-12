@@ -4,6 +4,10 @@ export const hasUserId = (request: FastifyRequest) => {
   return Boolean(request.session.userId);
 };
 
+export const getUserId = (request: FastifyRequest) => {
+  return request.session.userId;
+};
+
 export const hasIp = (request: FastifyRequest) => {
   return Boolean(request.session.ip);
 };
