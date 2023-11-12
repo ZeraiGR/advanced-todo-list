@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Session, FastifyRequest } from 'fastify';
 
 declare module 'fastify' {
