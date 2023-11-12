@@ -1,4 +1,4 @@
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import type { UserRegisterDto } from '../../types';
 
 import {
@@ -12,29 +12,25 @@ import { createIpAccountLimit, getAccountLimitByIp, updateIpAccountLimit } from 
 
 const IP_ACCOUNT_LIMIT = Number(process.env.IP_ACCOUNT_LIMIT);
 
-export const register = async (fastify: FastifyInstance, request: FastifyRequest, reply: FastifyReply) => {
+export const register = async (request: FastifyRequest, reply: FastifyReply) => {
   const body = request.body as UserRegisterDto;
 
   const { nickName, phone, email, password, confirmPassword } = body;
   const ip = request.ip;
 
   if (password !== confirmPassword) {
-    await request.session.destroy();
     return reply.status(400).send({ message: 'Пароли не совпадают' });
   }
 
   if (await hasUserWithNickname(nickName)) {
-    await request.session.destroy();
     return reply.status(400).send({ message: 'Пользователь c таким nickName уже существует' });
   }
 
   if (await hasUserWithEmail(email)) {
-    await request.session.destroy();
     return reply.status(400).send({ message: 'Пользователь c таким email уже существует' });
   }
 
   if (phone && (await hasUserWithPhone(phone))) {
-    await request.session.destroy();
     return reply.status(400).send({ message: 'Пользователь c таким номером телефона уже существует' });
   }
 
@@ -53,10 +49,10 @@ export const register = async (fastify: FastifyInstance, request: FastifyRequest
   }
 
   const user = await createUser(body);
-  fastify.log.info('A new user was created:', user);
+  request.log.info('A new user was created:', user);
 
   await createSession(request, ip, user.id);
-  fastify.log.info('A new session was created');
+  request.log.info('A new session was created');
 
   return { id: user.id };
 };
