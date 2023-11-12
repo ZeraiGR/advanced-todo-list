@@ -13,10 +13,14 @@ COPY --chown=node:node package*.json yarn*.lock ./
 
 
 FROM base as dev
+# устанавливаем openssl, чтобы решить конфликт с prisma CLI
+RUN apt-get update -y && apt-get install -y openssl
 ENV NODE_ENV=development
-COPY --chown=node:node . .
-USER node
+COPY prisma ./prisma
+# USER node
 RUN npm install
+COPY . .
+RUN npm run prisma:generate
 CMD ["npm", "run", "dev"]
 
 
